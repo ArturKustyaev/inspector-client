@@ -1,9 +1,12 @@
+import NiceModal from '@ebay/nice-modal-react'
+import { ThemeProvider } from '@mui/material'
 import { MutationCache, QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { isAxiosError } from 'axios'
 import { AppRouter } from 'components'
 import { UserContextProvider } from 'context'
 import { useSnackbar } from 'notistack'
 import { useState } from 'react'
+import { theme } from 'styles'
 
 function App() {
 	const { enqueueSnackbar } = useSnackbar()
@@ -32,11 +35,15 @@ function App() {
 	)
 
 	return (
-		<QueryClientProvider client={queryClient}>
-			<UserContextProvider>
-				<AppRouter />
-			</UserContextProvider>
-		</QueryClientProvider>
+		<ThemeProvider theme={theme}>
+			<QueryClientProvider client={queryClient}>
+				<NiceModal.Provider>
+					<UserContextProvider>
+						<AppRouter />
+					</UserContextProvider>
+				</NiceModal.Provider>
+			</QueryClientProvider>
+		</ThemeProvider>
 	)
 }
 

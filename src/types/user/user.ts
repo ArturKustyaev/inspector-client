@@ -1,8 +1,12 @@
 export interface User {
 	_id: string
-	login: string
 	firstName: string
 	lastName: string
 	middleName: string
-	isAdmin: boolean
+	email: string
+	login: string
+	password: string
+	role: UserRole
 }
+
+export type UserRole = 'user' | 'admin' | 'supervisor' | 'lawyer'
