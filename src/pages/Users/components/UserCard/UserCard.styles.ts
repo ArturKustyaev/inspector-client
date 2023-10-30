@@ -1,6 +1,6 @@
 import { Chip, Typography, styled } from '@mui/material'
 import { userRoleColors } from 'types'
-import { StyledUserRoleProps } from '.'
+import { StyledUserRoleProps } from './UserCard.types'
 
 export const StyledUserCard = styled('div')(({ theme }) => ({
 	backgroundColor: 'white',
@@ -9,11 +9,13 @@ export const StyledUserCard = styled('div')(({ theme }) => ({
 	textAlign: 'left'
 }))
 
-export const StyledUserRole = styled(Chip)<StyledUserRoleProps>(({ theme, $role }) => ({
-	color: 'white',
-	backgroundColor: userRoleColors[$role],
-	borderRadius: theme.spacing(0.75)
-}))
+export const StyledUserRole = styled(Chip, { shouldForwardProp: prop => prop !== '$role' })<StyledUserRoleProps>(
+	({ theme, $role }) => ({
+		color: 'white',
+		backgroundColor: userRoleColors[$role],
+		borderRadius: theme.spacing(0.75)
+	})
+)
 
 export const StyledUserName = styled(Typography)(({ theme }) => ({
 	color: theme.palette.primary.dark,

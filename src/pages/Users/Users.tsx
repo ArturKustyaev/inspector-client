@@ -8,7 +8,7 @@ import { StyledUserListWrapper } from './Users.styles'
 import { UserCard } from './components'
 
 export const Users: FC = (): ReactElement | null => {
-	const { data, isPending, isSuccess } = useInfiniteQuery({ ...getUsersQueryOptions({}) })
+	const { data, isPending, isSuccess } = useInfiniteQuery(getUsersQueryOptions({}))
 
 	return (
 		<PageLayout>

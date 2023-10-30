@@ -1,14 +1,19 @@
 import NiceModal, { useModal } from '@ebay/nice-modal-react'
-import { Button, Stack, TextField } from '@mui/material'
+import { Button, MenuItem, Stack, TextField } from '@mui/material'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { userApi } from 'api'
+import { useSnackbar } from 'notistack'
 import { ReactElement, useEffect } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { ConfirmDialog, Drawer, PasswordTextField } from 'ui-kit'
-import { userDrawerFormDefaultValues } from './UserDrawer.constants'
-import { getUserDrawerFormDefaultValues } from './UserDrawer.service'
+import { userDrawerFormDefaultValues, userRoleOptions } from './UserDrawer.constants'
+import { getUserDrawerFormDefaultValues, mapUserDrawerFormValues } from './UserDrawer.service'
 import { UserDrawerFormValues, UserDrawerProps } from './UserDrawer.types'
 
 export const UserDrawer = NiceModal.create<UserDrawerProps>(({ user }): ReactElement | null => {
+	const queryClient = useQueryClient()
 	const { visible, hide } = useModal()
+	const { enqueueSnackbar } = useSnackbar()
 	const confirmDialog = useModal(ConfirmDialog)
 	const {
 		control,
@@ -18,6 +23,15 @@ export const UserDrawer = NiceModal.create<UserDrawerProps>(({ user }): ReactEle
 	} = useForm<UserDrawerFormValues>({
 		defaultValues: userDrawerFormDefaultValues
 	})
+	const { mutate } = useMutation({
+		mutationFn: userApi.update,
+		onSuccess: () => {
+			enqueueSnackbar('Пользователь успешно изменен', { variant: 'success' })
+			closeDrawer()
+
+			return queryClient.invalidateQueries({ queryKey: ['users'] })
+		}
+	})
 
 	useEffect(() => {
 		if (visible) {
@@ -26,7 +40,9 @@ export const UserDrawer = NiceModal.create<UserDrawerProps>(({ user }): ReactEle
 	}, [visible])
 
 	const submitFormHandler = (values: UserDrawerFormValues) => {
-		console.log(values)
+		if (user?._id) {
+			mutate({ params: { id: user._id }, body: mapUserDrawerFormValues(values) })
+		}
 	}
 
 	const confirmCloseDrawer = () => {
@@ -35,98 +51,95 @@ export const UserDrawer = NiceModal.create<UserDrawerProps>(({ user }): ReactEle
 
 	const closeDrawer = () => {
 		hide()
+
+		setTimeout(() => {
+			reset()
+		}, 300)
 	}
 
 	return (
 		<Drawer title='Изменение пользователя' anchor='right' open={visible} onClose={confirmCloseDrawer}>
 			<Stack height='100%' px={3} py={2}>
 				<Stack component='form' height='100%' onSubmit={handleSubmit(submitFormHandler)}>
-					<Controller
-						control={control}
-						name='lastName'
-						render={({ field: { ref, ...fieldProps }, fieldState: { error } }) => (
-							<TextField
-								{...fieldProps}
-								inputRef={ref}
-								label='Фамилия'
-								size='small'
-								error={!!error}
-								helperText={error?.message}
-							/>
-						)}
-					/>
-					<Controller
-						control={control}
-						name='firstName'
-						render={({ field: { ref, ...fieldProps }, fieldState: { error } }) => (
-							<TextField
-								{...fieldProps}
-								inputRef={ref}
-								label='Имя'
-								size='small'
-								error={!!error}
-								helperText={error?.message}
-							/>
-						)}
-					/>
-					<Controller
-						control={control}
-						name='middleName'
-						render={({ field: { ref, ...fieldProps }, fieldState: { error } }) => (
-							<TextField
-								{...fieldProps}
-								inputRef={ref}
-								label='Отчество'
-								size='small'
-								error={!!error}
-								helperText={error?.message}
-							/>
-						)}
-					/>
-					<Controller
-						control={control}
-						name='email'
-						render={({ field: { ref, ...fieldProps }, fieldState: { error } }) => (
-							<TextField
-								{...fieldProps}
-								inputRef={ref}
-								label='E-mail'
-								size='small'
-								error={!!error}
-								helperText={error?.message}
-							/>
-						)}
-					/>
-					<Controller
-						control={control}
-						name='login'
-						render={({ field: { ref, ...fieldProps }, fieldState: { error } }) => (
-							<TextField
-								{...fieldProps}
-								inputRef={ref}
-								label='Логин'
-								size='small'
-								error={!!error}
-								helperText={error?.message}
-							/>
-						)}
-					/>
-					<Controller
-						control={control}
-						name='password'
-						render={({ field: { ref, ...fieldProps }, fieldState: { error } }) => (
-							<PasswordTextField
-								{...fieldProps}
-								inputRef={ref}
-								label='Пароль'
-								size='small'
-								error={!!error}
-								helperText={error?.message}
-							/>
-						)}
-					/>
+					<Stack spacing={3}>
+						<Controller
+							control={control}
+							name='lastName'
+							render={({ field: { ref, ...fieldProps }, fieldState: { error } }) => (
+								<TextField {...fieldProps} inputRef={ref} label='Фамилия' error={!!error} helperText={error?.message} />
+							)}
+						/>
+						<Controller
+							control={control}
+							name='firstName'
+							render={({ field: { ref, ...fieldProps }, fieldState: { error } }) => (
+								<TextField {...fieldProps} inputRef={ref} label='Имя' error={!!error} helperText={error?.message} />
+							)}
+						/>
+						<Controller
+							control={control}
+							name='middleName'
+							render={({ field: { ref, ...fieldProps }, fieldState: { error } }) => (
+								<TextField
+									{...fieldProps}
+									inputRef={ref}
+									label='Отчество'
+									error={!!error}
+									helperText={error?.message}
+								/>
+							)}
+						/>
+						<Controller
+							control={control}
+							name='role'
+							render={({ field: { ref, ...fieldProps }, fieldState: { error } }) => (
+								<TextField
+									{...fieldProps}
+									inputRef={ref}
+									label='Роль пользователя'
+									error={!!error}
+									helperText={error?.message}
+									select
+								>
+									{userRoleOptions.map(option => (
+										<MenuItem key={option.value} value={option.value}>
+											{option.label}
+										</MenuItem>
+									))}
+								</TextField>
+							)}
+						/>
+						<Controller
+							control={control}
+							name='email'
+							render={({ field: { ref, ...fieldProps }, fieldState: { error } }) => (
+								<TextField {...fieldProps} inputRef={ref} label='E-mail' error={!!error} helperText={error?.message} />
+							)}
+						/>
+						<Controller
+							control={control}
+							name='login'
+							render={({ field: { ref, ...fieldProps }, fieldState: { error } }) => (
+								<TextField {...fieldProps} inputRef={ref} label='Логин' error={!!error} helperText={error?.message} />
+							)}
+						/>
+						<Controller
+							control={control}
+							name='password'
+							render={({ field: { ref, ...fieldProps }, fieldState: { error } }) => (
+								<PasswordTextField
+									autoComplete='off'
+									{...fieldProps}
+									inputRef={ref}
+									label='Новый пароль'
+									error={!!error}
+									helperText={error?.message}
+								/>
+							)}
+						/>
+					</Stack>
 					<Stack direction='row' spacing={2} mt='auto'>
-						<Button variant='contained' color='success' type='submit' fullWidth>
+						<Button variant='contained' color='success' type='submit' disabled={!isDirty} fullWidth>
 							Сохранить
 						</Button>
 						<Button fullWidth onClick={confirmCloseDrawer}>
