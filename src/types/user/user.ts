@@ -5,7 +5,6 @@ export interface User {
 	middleName: string
 	email: string
 	login: string
-	password: string
 	role: UserRole
 }
 

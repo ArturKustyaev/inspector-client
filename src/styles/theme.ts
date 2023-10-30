@@ -7,6 +7,11 @@ export const theme = createTheme({
 				variant: 'contained',
 				disableElevation: true
 			}
+		},
+		MuiTextField: {
+			defaultProps: {
+				size: 'small'
+			}
 		}
 	}
 })
