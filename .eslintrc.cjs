@@ -15,6 +15,7 @@ module.exports = {
 		'@typescript-eslint/no-non-null-asserted-optional-chain': 'warn',
 		'@typescript-eslint/ban-ts-comment': 'warn',
 		'@typescript-eslint/no-empty-function': 'warn',
+		'@typescript-eslint/no-unused-vars': ['warn'],
 		'prefer-const': 'warn',
 		'no-empty': 'warn',
 		'no-extra-boolean-cast': 'warn',

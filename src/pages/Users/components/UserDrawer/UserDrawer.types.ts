@@ -10,6 +10,9 @@ export interface UserDrawerFormValues {
 	middleName: string
 	email: string
 	login: string
-	password: string
-	role: UserRole
+	password?: string
+	role: UserRole | null
+	isAddUser: boolean
+	avatarPreview: string | null
+	avatar: File | null
 }

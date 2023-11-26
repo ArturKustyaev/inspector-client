@@ -1,7 +1,7 @@
 import { useMutation } from '@tanstack/react-query'
-import { CustomHookMutationOptions } from 'api/api.types'
-import { LoginRequest, LoginResponse } from '..'
+import { CustomHookMutationOptions } from 'api'
 import { authApi } from '../auth'
+import { LoginRequest, LoginResponse } from '../auth.types'
 
 interface UseLoginMutation {
 	options?: CustomHookMutationOptions<LoginResponse, LoginRequest>

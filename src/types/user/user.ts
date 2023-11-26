@@ -6,6 +6,7 @@ export interface User {
 	email: string
 	login: string
 	role: UserRole
+	avatar: string | null
 }
 
 export type UserRole = 'user' | 'admin' | 'supervisor' | 'lawyer'

@@ -1,4 +1,5 @@
 import { IconButton, Menu, MenuItem, Avatar as MuiAvatar } from '@mui/material'
+import { useQueryClient } from '@tanstack/react-query'
 import { useUserContext } from 'context'
 import { FC, ReactElement, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -10,6 +11,7 @@ export const Avatar: FC = (): ReactElement | null => {
 	const [, setAuth] = useLocalStorage<TokenPair | null>('auth', null)
 	const { user, resetUser } = useUserContext()
 	const [anchor, setAnchor] = useState<HTMLElement | null>(null)
+	const queryClient = useQueryClient()
 
 	const openMenuHandler = (event: React.MouseEvent<HTMLElement>) => {
 		setAnchor(event.currentTarget)
@@ -23,12 +25,13 @@ export const Avatar: FC = (): ReactElement | null => {
 		resetUser()
 		setAuth(null)
 		navigate('/login')
+		queryClient.removeQueries()
 	}
 
 	return (
 		<>
 			<IconButton onClick={openMenuHandler}>
-				<MuiAvatar src='' alt={user?.firstName}>
+				<MuiAvatar src={user?.avatar ?? undefined} alt={user?.firstName}>
 					{user?.firstName[0]}
 				</MuiAvatar>
 			</IconButton>

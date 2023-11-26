@@ -1,8 +1,8 @@
 import { AppBar, Container, Stack, Typography } from '@mui/material'
-import { FC, ReactElement } from 'react'
+import { FC, ReactElement, memo } from 'react'
 import { Avatar } from './components'
 
-export const Header: FC = (): ReactElement | null => {
+export const Header: FC = memo((): ReactElement | null => {
 	return (
 		<AppBar sx={{ background: 'white' }} elevation={0} color='default' position='static'>
 			<Container>
@@ -13,4 +13,6 @@ export const Header: FC = (): ReactElement | null => {
 			</Container>
 		</AppBar>
 	)
-}
+})
+
+Header.displayName = 'Header'

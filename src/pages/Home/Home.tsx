@@ -1,8 +1,6 @@
-import { PageLayout } from 'layout'
 import { FC, ReactElement } from 'react'
+import { Navigate } from 'react-router-dom'
 
-interface HomeProps {}
-
-export const Home: FC<HomeProps> = (): ReactElement | null => {
-	return <PageLayout></PageLayout>
+export const Home: FC = (): ReactElement | null => {
+	return <Navigate to='/violations' />
 }

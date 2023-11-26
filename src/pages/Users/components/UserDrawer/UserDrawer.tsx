@@ -1,14 +1,19 @@
 import NiceModal, { useModal } from '@ebay/nice-modal-react'
-import { Button, MenuItem, Stack, TextField } from '@mui/material'
+import { yupResolver } from '@hookform/resolvers/yup'
+import { Box, Button, MenuItem, Stack, TextField } from '@mui/material'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { userApi } from 'api'
+import { ImagePreview } from 'components'
 import { useSnackbar } from 'notistack'
 import { ReactElement, useEffect } from 'react'
-import { Controller, useForm } from 'react-hook-form'
+import { Controller, useForm, useWatch } from 'react-hook-form'
 import { ConfirmDialog, Drawer, PasswordTextField } from 'ui-kit'
 import { userDrawerFormDefaultValues, userRoleOptions } from './UserDrawer.constants'
-import { getUserDrawerFormDefaultValues, mapUserDrawerFormValues } from './UserDrawer.service'
+import { getUserDrawerFormDefaultValues, getUserDrawerTitle, mapUserDrawerFormValues } from './UserDrawer.service'
+import { StyledHiddenInput } from './UserDrawer.styles'
 import { UserDrawerFormValues, UserDrawerProps } from './UserDrawer.types'
+import { userSchema } from './UserDrawer.validation'
+import { useImagePreview } from 'hooks'
 
 export const UserDrawer = NiceModal.create<UserDrawerProps>(({ user }): ReactElement | null => {
 	const queryClient = useQueryClient()
@@ -18,12 +23,23 @@ export const UserDrawer = NiceModal.create<UserDrawerProps>(({ user }): ReactEle
 	const {
 		control,
 		formState: { isDirty },
+		setValue,
 		reset,
 		handleSubmit
 	} = useForm<UserDrawerFormValues>({
-		defaultValues: userDrawerFormDefaultValues
+		defaultValues: userDrawerFormDefaultValues,
+		resolver: yupResolver(userSchema)
 	})
-	const { mutate } = useMutation({
+	const createUserMutation = useMutation({
+		mutationFn: userApi.create,
+		onSuccess: () => {
+			enqueueSnackbar('Пользователь успешно создан', { variant: 'success' })
+			closeDrawer()
+
+			return queryClient.invalidateQueries({ queryKey: ['users'] })
+		}
+	})
+	const updateUserMutation = useMutation({
 		mutationFn: userApi.update,
 		onSuccess: () => {
 			enqueueSnackbar('Пользователь успешно изменен', { variant: 'success' })
@@ -32,16 +48,20 @@ export const UserDrawer = NiceModal.create<UserDrawerProps>(({ user }): ReactEle
 			return queryClient.invalidateQueries({ queryKey: ['users'] })
 		}
 	})
+	const avatar = useWatch({ control }).avatar
+	const [image, setImage] = useImagePreview(avatar)
 
 	useEffect(() => {
 		if (visible) {
-			reset(getUserDrawerFormDefaultValues(user))
+			reset(getUserDrawerFormDefaultValues(user, !user))
 		}
 	}, [visible])
 
 	const submitFormHandler = (values: UserDrawerFormValues) => {
 		if (user?._id) {
-			mutate({ params: { id: user._id }, body: mapUserDrawerFormValues(values) })
+			updateUserMutation.mutate({ params: { id: user._id }, body: mapUserDrawerFormValues(values) })
+		} else {
+			createUserMutation.mutate(mapUserDrawerFormValues(values))
 		}
 	}
 
@@ -51,6 +71,7 @@ export const UserDrawer = NiceModal.create<UserDrawerProps>(({ user }): ReactEle
 
 	const closeDrawer = () => {
 		hide()
+		setImage(null)
 
 		setTimeout(() => {
 			reset()
@@ -58,10 +79,29 @@ export const UserDrawer = NiceModal.create<UserDrawerProps>(({ user }): ReactEle
 	}
 
 	return (
-		<Drawer title='Изменение пользователя' anchor='right' open={visible} onClose={confirmCloseDrawer}>
+		<Drawer title={getUserDrawerTitle(!user)} open={visible} onClose={confirmCloseDrawer}>
 			<Stack height='100%' px={3} py={2}>
 				<Stack component='form' height='100%' onSubmit={handleSubmit(submitFormHandler)}>
-					<Stack spacing={3}>
+					<Stack spacing={3} mb={2}>
+						<Controller
+							control={control}
+							name='avatarPreview'
+							render={({ field: { value } }) => (
+								<Box overflow='hidden'>
+									<ImagePreview url={image || value || undefined} width={200} height={200} />
+									<Box mt={1} textAlign='center'>
+										<Button component='label'>
+											Загрузить фото
+											<StyledHiddenInput
+												type='file'
+												accept='.jpeg, .jpg, .png'
+												onChange={e => setValue('avatar', e.target.files?.[0] ?? null)}
+											/>
+										</Button>
+									</Box>
+								</Box>
+							)}
+						/>
 						<Controller
 							control={control}
 							name='lastName'
@@ -131,7 +171,7 @@ export const UserDrawer = NiceModal.create<UserDrawerProps>(({ user }): ReactEle
 									autoComplete='off'
 									{...fieldProps}
 									inputRef={ref}
-									label='Новый пароль'
+									label={user ? 'Новый пароль' : 'Пароль'}
 									error={!!error}
 									helperText={error?.message}
 								/>
@@ -139,7 +179,7 @@ export const UserDrawer = NiceModal.create<UserDrawerProps>(({ user }): ReactEle
 						/>
 					</Stack>
 					<Stack direction='row' spacing={2} mt='auto'>
-						<Button variant='contained' color='success' type='submit' disabled={!isDirty} fullWidth>
+						<Button variant='contained' color='success' type='submit' fullWidth>
 							Сохранить
 						</Button>
 						<Button fullWidth onClick={confirmCloseDrawer}>

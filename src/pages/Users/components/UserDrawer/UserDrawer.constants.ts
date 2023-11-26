@@ -8,7 +8,10 @@ export const userDrawerFormDefaultValues: UserDrawerFormValues = {
 	email: '',
 	login: '',
 	password: '',
-	role: 'user'
+	role: null,
+	isAddUser: true,
+	avatarPreview: null,
+	avatar: null
 }
 
 export const userRoleOptions: Option<string, UserRole>[] = [

@@ -14,3 +14,5 @@ export const userRoleColors: Record<UserRole, string> = {
 	supervisor: theme.palette.success.light,
 	user: theme.palette.warning.light
 }
+
+export const roleArray: UserRole[] = ['admin', 'lawyer', 'supervisor', 'user']

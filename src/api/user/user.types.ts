@@ -1,7 +1,7 @@
 import { PaginatedRequest } from 'api/api.types'
 import { User } from 'types'
 
-export interface UpdateUserBody extends Omit<User, '_id' | 'password'> {
+export interface UpdateUserBody extends Omit<User, '_id' | 'password' | 'avatar'> {
 	password?: string
 }
 
