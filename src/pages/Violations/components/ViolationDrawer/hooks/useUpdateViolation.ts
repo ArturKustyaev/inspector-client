@@ -1,18 +1,18 @@
 import { useQueryClient } from '@tanstack/react-query'
-import { useCreateViolationMutation } from 'api'
+import { useUpdateViolationMutation } from 'api'
 import { useSnackbar } from 'notistack'
 
-interface UseCreateViolation {
+interface UseUpdateViolation {
   onSuccess: () => void
 }
 
-export const useCreateViolation = ({ onSuccess }: UseCreateViolation) => {
+export const useUpdateViolation = ({ onSuccess }: UseUpdateViolation) => {
   const { enqueueSnackbar } = useSnackbar()
   const queryClient = useQueryClient()
 
-  return useCreateViolationMutation({
+  return useUpdateViolationMutation({
     onSuccess: () => {
-      enqueueSnackbar('Запись успешно создана', {
+      enqueueSnackbar('Запись успешно обновлена', {
         variant: 'success',
       })
 

@@ -3,6 +3,6 @@ export interface CreateFormValues {
 	discoveryDate: Date | null
 	violationType: string | null
 	district: string | null
-	location: string
-	description: string
+	location?: string
+	description?: string
 }
