@@ -1,3 +1,4 @@
+export * from './useApproveViolation'
 export * from './useCreateViolation'
 export * from './useDeleteViolation'
 export * from './useUpdateViolation'

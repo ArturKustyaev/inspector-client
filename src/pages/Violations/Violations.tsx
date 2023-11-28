@@ -1,5 +1,5 @@
 import NiceModal from '@ebay/nice-modal-react'
-import { Button, Grid, TextField } from '@mui/material'
+import { Button, Grid, Stack, TextField, Typography } from '@mui/material'
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { getTasksQueryOptions } from 'api'
 import { PageLoader } from 'components'
@@ -14,7 +14,7 @@ interface ViolationsProps {}
 export const Violations: FC<ViolationsProps> = (): ReactElement | null => {
   const { isAdmin, isInspector } = useUserPrivileges()
   const [search, setSearch] = useState('')
-  const debouncedSearch = useDebounceValue(search)
+  const debouncedSearch = useDebounceValue(search, 1000)
   const { data, isPending, isSuccess } = useInfiniteQuery(getTasksQueryOptions({ query: debouncedSearch || undefined }))
 
   const isCreateButtonShowed = isAdmin || isInspector
@@ -36,15 +36,22 @@ export const Violations: FC<ViolationsProps> = (): ReactElement | null => {
         </StyledToolbar>
         {isPending && <PageLoader />}
         {isSuccess && (
-          <Grid spacing={2} container>
-            {data.pages.map((page) =>
-              page.data.map((violation) => (
-                <Grid key={violation._id} xl={4} lg={4} sm={6} xs={12} item>
-                  <ViolationCard violation={violation} />
-                </Grid>
-              )),
+          <>
+            <Grid spacing={2} container>
+              {data.pages.map((page) =>
+                page.data.map((violation) => (
+                  <Grid key={violation._id} xl={4} lg={4} sm={6} xs={12} item>
+                    <ViolationCard violation={violation} />
+                  </Grid>
+                )),
+              )}
+            </Grid>
+            {data.pages[0].total === 0 && (
+              <Stack flexGrow={1} justifyContent="center" alignItems="center">
+                <Typography>Нет записей о нарушениях</Typography>
+              </Stack>
             )}
-          </Grid>
+          </>
         )}
       </StyledViolationsWrapper>
     </PageLayout>

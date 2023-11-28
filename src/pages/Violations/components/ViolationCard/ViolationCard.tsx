@@ -20,12 +20,9 @@ export const ViolationCard: FC<ViolationCardProps> = ({ violation }): ReactEleme
     <StyledViolationCard onClick={cardClickHandler}>
       <CardActionArea sx={{ flex: 1 }}>
         <Stack height="100%" p={2}>
-          <Stack mb={1}>
-            <Typography variant="subtitle1" mb={1}>
-              {violation.violationInfo.title}
-            </Typography>
-            <Typography mt="auto">{violation.violationInfo.description}</Typography>
-          </Stack>
+          <Typography variant="subtitle1" mb={1}>
+            {violation.violationInfo.title}
+          </Typography>
           <Stack mt="auto" mb={2} spacing={1}>
             <Divider />
             <ViolationCardField label="Создано:" value={getFormatDate({ date: violation.createdAt })} />

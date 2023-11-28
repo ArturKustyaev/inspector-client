@@ -1,5 +1,6 @@
 import { infiniteQueryOptions, useMutation } from '@tanstack/react-query'
 import {
+  ApproveBody,
   BASE_FETCH_COUNT,
   ChangeStatusBody,
   CreateViolationBody,
@@ -7,8 +8,8 @@ import {
   PaginatedRequest,
   UpdateViolationBody,
 } from 'api'
-import { violation } from './task'
 import { Violation } from 'types'
+import { violation } from './task'
 
 export const getTasksQueryOptions = ({ count = BASE_FETCH_COUNT, query }: Omit<PaginatedRequest, 'page'>) =>
   infiniteQueryOptions({
@@ -33,5 +34,11 @@ export const useDeleteViolationMutation = (options?: CustomHookMutationOptions<V
 export const useViolationChangeStatusMutation = (options?: CustomHookMutationOptions<Violation, ChangeStatusBody>) =>
   useMutation({
     mutationFn: (body: ChangeStatusBody) => violation.changeStatus(body).then((res) => res.data),
+    ...options,
+  })
+
+export const useApproveMutation = (options?: CustomHookMutationOptions<Violation, ApproveBody>) =>
+  useMutation({
+    mutationFn: (body: ApproveBody) => violation.approve(body).then((res) => res.data),
     ...options,
   })

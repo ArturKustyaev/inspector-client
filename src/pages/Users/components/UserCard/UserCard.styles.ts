@@ -4,8 +4,8 @@ import { Typography, styled } from '@mui/material'
 export const StyledUserCard = styled('div')(({ theme }) => ({
   backgroundColor: 'white',
   borderRadius: theme.spacing(1),
-  padding: theme.spacing(2),
   textAlign: 'left',
+  overflow: 'hidden',
 }))
 
 export const StyledUserName = styled(Typography)(({ theme }) => ({

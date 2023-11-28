@@ -4,20 +4,31 @@ import { Stack } from '@mui/material'
 import { CreateViolationBody } from 'api'
 import { ReactElement, useEffect, useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
+import { ReviewStatus, ViolationStatus } from 'types'
 import { ConfirmDialog, Drawer } from 'ui-kit'
 import { ViolationDrawerProps } from './ViolationDrawer.types'
 import {
   CourtForm,
+  CourtFormValues,
   CreateActions,
   CreateForm,
   CreateFormValues,
   FormBox,
+  ReviewerDataGrid,
   Stages,
+  courtFormDefaultValues,
   createFormDefaultValues,
   createViolationSchema,
   getCreateFormDefaultValues,
 } from './components'
-import { useCreateViolation, useDeleteViolation, useUpdateViolation, useViolationChangeStatus } from './hooks'
+import { courtViolationSchema } from './components/CourtForm/CourtForm.validation'
+import {
+  useApproveViolation,
+  useCreateViolation,
+  useDeleteViolation,
+  useUpdateViolation,
+  useViolationChangeStatus,
+} from './hooks'
 
 export const ViolationDrawer = NiceModal.create<ViolationDrawerProps>(({ violation }): ReactElement | null => {
   const { visible, hide } = useModal()
@@ -26,12 +37,17 @@ export const ViolationDrawer = NiceModal.create<ViolationDrawerProps>(({ violati
     defaultValues: createFormDefaultValues,
     resolver: yupResolver(createViolationSchema),
   })
+  const courtMethods = useForm<CourtFormValues>({
+    defaultValues: courtFormDefaultValues,
+    resolver: yupResolver(courtViolationSchema),
+  })
   const createMutation = useCreateViolation({ onSuccess: closeDrawer })
   const updateMutation = useUpdateViolation({ onSuccess: closeDrawer })
   const deleteMutation = useDeleteViolation({ onSuccess: closeDrawer })
   const changeStatusMutation = useViolationChangeStatus({ onSuccess: closeDrawer })
+  const approveMutation = useApproveViolation({ onSuccess: closeDrawer })
 
-  const someFormIsDirty = createMethods.formState.isDirty
+  const someFormIsDirty = createMethods.formState.isDirty || courtMethods.formState.isDirty
   const inspector = violation?.violationInfo.user
   const status = violation?.violationInfo.status
   const created = violation?.createdAt
@@ -67,12 +83,25 @@ export const ViolationDrawer = NiceModal.create<ViolationDrawerProps>(({ violati
     })
   }
 
-  const approvalViolation = () => {
+  const updateViolationStatus = (status: ViolationStatus) => {
     if (!violation?._id) {
       throw new Error('invalid violation id')
     }
 
-    changeStatusMutation.mutate({ id: violation._id, status: 'coordination' })
+    changeStatusMutation.mutate({ id: violation._id, status })
+  }
+
+  const approveViolation = (status: ReviewStatus, message?: string) => {
+    if (!violation?._id) {
+      throw new Error('invalid violation id')
+    }
+
+    approveMutation.mutate({
+      id: violation._id,
+      date: new Date().toISOString(),
+      status,
+      message,
+    })
   }
 
   const closeDrawerWithConfirmHandler = () => {
@@ -83,7 +112,9 @@ export const ViolationDrawer = NiceModal.create<ViolationDrawerProps>(({ violati
     hide()
 
     setTimeout(() => {
-      createMethods.reset({})
+      setStage(1)
+      createMethods.reset(createFormDefaultValues)
+      courtMethods.reset(courtFormDefaultValues)
     }, 300)
   }
 
@@ -107,29 +138,27 @@ export const ViolationDrawer = NiceModal.create<ViolationDrawerProps>(({ violati
                     />
                   </FormProvider>
                 ),
-                2: <></>,
-                3: <CourtForm></CourtForm>,
+                2: <ReviewerDataGrid data={violation?.review ?? []} />,
+                3: (
+                  <FormProvider {...courtMethods}>
+                    <CourtForm status={status} />
+                  </FormProvider>
+                ),
               }[stage]
             }
           </FormBox>
-          <FormBox width={300} flexShrink={0} height="100%"></FormBox>
+          {stage !== 2 && <FormBox width={300} flexShrink={0} height="100%"></FormBox>}
         </Stack>
       </Stack>
-      {
-        {
-          1: (
-            <CreateActions
-              control={createMethods.control}
-              status={status}
-              onApproval={approvalViolation}
-              onCancel={closeDrawerWithConfirmHandler}
-              onDelete={deleteViolation}
-            />
-          ),
-          2: <></>,
-          3: <></>,
-        }[stage]
-      }
+      <CreateActions
+        stage={stage}
+        status={status}
+        createControl={createMethods.control}
+        onUpdateStatus={updateViolationStatus}
+        onApprove={approveViolation}
+        onCancel={closeDrawerWithConfirmHandler}
+        onDelete={deleteViolation}
+      />
     </Drawer>
   )
 })

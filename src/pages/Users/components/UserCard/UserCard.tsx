@@ -1,21 +1,20 @@
 import NiceModal from '@ebay/nice-modal-react'
 import DeleteIcon from '@mui/icons-material/Delete'
-import ModeEditIcon from '@mui/icons-material/ModeEdit'
-import { Box, Divider, IconButton, Stack, Tooltip, Typography } from '@mui/material'
+import { Box, CardActionArea, Divider, IconButton, Stack, Tooltip, Typography } from '@mui/material'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { userApi } from 'api'
 import { useSnackbar } from 'notistack'
-import { FC, ReactElement, memo } from 'react'
+import { FC, MouseEvent, ReactElement, memo } from 'react'
 import { userRoleColors, userRoleLabels } from 'types'
 import { Chip, ConfirmDialog } from 'ui-kit'
 import { generateRandomString } from 'utils'
 import {
-	StyledAvatar,
-	StyledAvatarWrapper,
-	StyledNoAvatarIcon,
-	StyledNoAvatarWrapper,
-	StyledUserCard,
-	StyledUserName,
+  StyledAvatar,
+  StyledAvatarWrapper,
+  StyledNoAvatarIcon,
+  StyledNoAvatarWrapper,
+  StyledUserCard,
+  StyledUserName,
 } from './UserCard.styles'
 import { UserCardProps } from './UserCard.types'
 
@@ -34,7 +33,10 @@ export const UserCard: FC<UserCardProps> = memo(({ user, onUpdateUser }): ReactE
     onUpdateUser(user)
   }
 
-  const deleteUserClickHandler = () => {
+  const deleteUserClickHandler = (e: MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation()
+    e.preventDefault()
+
     NiceModal.show(ConfirmDialog, {
       title: 'Удаление пользователя',
       denyButtonText: 'Нет',
@@ -44,43 +46,42 @@ export const UserCard: FC<UserCardProps> = memo(({ user, onUpdateUser }): ReactE
   }
 
   return (
-    <StyledUserCard>
-      <Stack direction="row" justifyContent="space-between" alignItems="center">
-        <Chip label={userRoleLabels[user.role]} size="small" color={userRoleColors[user.role]} />
-        <Stack direction="row">
-          <Tooltip title="Изменить" arrow>
-            <IconButton color="primary" size="small" onClick={updateUserClickHandler}>
-              <ModeEditIcon />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="Удалить" arrow>
-            <IconButton color="error" size="small" onClick={deleteUserClickHandler}>
-              <DeleteIcon />
-            </IconButton>
-          </Tooltip>
-        </Stack>
-      </Stack>
-      <Stack direction="row" pt={1} spacing={1} mb={2}>
-        <StyledAvatarWrapper>
-          {user.avatar ? (
-            <StyledAvatar src={`${user.avatar}?${generateRandomString()}`} />
-          ) : (
-            <StyledNoAvatarWrapper>
-              <StyledNoAvatarIcon />
-            </StyledNoAvatarWrapper>
-          )}
-        </StyledAvatarWrapper>
-        <Box>
-          <StyledUserName variant="body1">
-            {user.lastName} {user.firstName} {user.middleName}
-          </StyledUserName>
+    <StyledUserCard onClick={updateUserClickHandler}>
+      <CardActionArea sx={{ flex: 1 }}>
+        <Box p={2}>
+          <Stack direction="row" justifyContent="space-between" alignItems="center">
+            <Chip label={userRoleLabels[user.role]} size="small" color={userRoleColors[user.role]} />
+            <Stack direction="row">
+              <Tooltip title="Удалить" arrow>
+                <IconButton color="error" size="small" disableRipple onClick={deleteUserClickHandler}>
+                  <DeleteIcon />
+                </IconButton>
+              </Tooltip>
+            </Stack>
+          </Stack>
+          <Stack direction="row" pt={1} spacing={1} mb={2}>
+            <StyledAvatarWrapper>
+              {user.avatar ? (
+                <StyledAvatar src={`${user.avatar}?${generateRandomString()}`} />
+              ) : (
+                <StyledNoAvatarWrapper>
+                  <StyledNoAvatarIcon />
+                </StyledNoAvatarWrapper>
+              )}
+            </StyledAvatarWrapper>
+            <Box>
+              <StyledUserName variant="body1">
+                {user.lastName} {user.firstName} {user.middleName}
+              </StyledUserName>
+            </Box>
+          </Stack>
+          <Divider />
+          <Box mt={1}>
+            <Typography variant="body1">Логин: {user.login}</Typography>
+            <Typography variant="body1">E-mail: {user.email}</Typography>
+          </Box>
         </Box>
-      </Stack>
-      <Divider />
-      <Box mt={1}>
-        <Typography variant="body1">Логин: {user.login}</Typography>
-        <Typography variant="body1">E-mail: {user.email}</Typography>
-      </Box>
+      </CardActionArea>
     </StyledUserCard>
   )
 })

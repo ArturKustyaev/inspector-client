@@ -36,5 +36,5 @@ export function mapCreateFormValues(values: CreateFormValues): CreateViolationBo
 export function isCreateFormReadonlyField(status: ViolationStatus | undefined) {
   if (!status) return false
 
-  return status !== 'created'
+  return status !== 'created' && status !== 'revision'
 }

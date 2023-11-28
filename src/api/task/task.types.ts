@@ -1,4 +1,4 @@
-import { ViolationStatus } from 'types'
+import { ReviewStatus, ViolationStatus } from 'types'
 
 export const s = 1
 
@@ -18,4 +18,11 @@ export interface UpdateViolationBody extends Partial<CreateViolationBody> {
 export interface ChangeStatusBody {
   id: string
   status: ViolationStatus
+}
+
+export interface ApproveBody {
+  id: string
+  status: ReviewStatus
+  date: string
+  message?: string
 }

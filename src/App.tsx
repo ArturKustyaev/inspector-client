@@ -12,54 +12,53 @@ import { useState } from 'react'
 import { theme } from 'styles'
 
 function App() {
-	const { enqueueSnackbar } = useSnackbar()
-	const [queryClient] = useState(
-		() =>
-			new QueryClient({
-				defaultOptions: {
-					queries: {
-						retry: 3
-					}
-				},
-				mutationCache: new MutationCache({
-					onError: error => {
-						if (isAxiosError(error)) {
-							if (Array.isArray(error.response?.data.message)) {
-								enqueueSnackbar(error.response?.data.message.join(', '), {
-									variant: 'error'
-								})
-							} else {
-								enqueueSnackbar(error.response?.data.message, {
-									variant: 'error'
-								})
-							}
-						} else {
-							enqueueSnackbar(error.message, {
-								variant: 'error'
-							})
-						}
-					}
-				})
-			})
-	)
+  const { enqueueSnackbar } = useSnackbar()
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            retry: 3,
+          },
+        },
+        mutationCache: new MutationCache({
+          onError: (error) => {
+            if (isAxiosError(error)) {
+              if (Array.isArray(error.response?.data.message)) {
+                enqueueSnackbar(error.response?.data.message.join(', '), {
+                  variant: 'error',
+                })
+              } else {
+                enqueueSnackbar(error.response?.data.message, {
+                  variant: 'error',
+                })
+              }
+            } else {
+              enqueueSnackbar(error.message, {
+                variant: 'error',
+              })
+            }
+          },
+        }),
+      }),
+  )
 
-	return (
-		<ThemeProvider theme={theme}>
-			<LocalizationProvider
-				localeText={ruRU.components.MuiLocalizationProvider.defaultProps.localeText}
-				dateAdapter={AdapterDateFns}
-				adapterLocale={ruLocale}
-			>
-				<QueryClientProvider client={queryClient}>
-					<NiceModal.Provider>
-						<UserContextProvider>
-							<AppRouter />
-						</UserContextProvider>
-					</NiceModal.Provider>
-				</QueryClientProvider>
-			</LocalizationProvider>
-		</ThemeProvider>
-	)
+  return (
+    <ThemeProvider theme={theme}>
+      <LocalizationProvider
+        localeText={ruRU.components.MuiLocalizationProvider.defaultProps.localeText}
+        dateAdapter={AdapterDateFns}
+        adapterLocale={ruLocale}>
+        <QueryClientProvider client={queryClient}>
+          <UserContextProvider>
+            <NiceModal.Provider>
+              <AppRouter />
+            </NiceModal.Provider>
+          </UserContextProvider>
+        </QueryClientProvider>
+      </LocalizationProvider>
+    </ThemeProvider>
+  )
 }
 
 export default App

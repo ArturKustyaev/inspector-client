@@ -10,5 +10,6 @@ export const changeViolationStatusMessages: Record<ViolationStatus, string> = {
   completed: 'Успешно исполнена',
   coordination: 'Успешно отправлено на согласование',
   created: '',
-  revision: '',
+  court: '',
+  revision: 'Успешно отправлено на доработку',
 }
